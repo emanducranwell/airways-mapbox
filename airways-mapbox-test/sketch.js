@@ -7,6 +7,16 @@ let startMarker = null;
 let endMarker = null;
 const info = document.getElementById('info');
 
+// const bounds = map.getBounds();
+
+// const west = bounds.getWest();
+// const east = bounds.getEast();
+// const south = bounds.getSouth();
+// const north = bounds.getNorth();
+
+// const lngStep = (east - west) / cols;
+// const latStep = (north - south) / rows;
+
 //global a* variables
 var cols = 50;
 var rows = 50;
@@ -18,16 +28,14 @@ var start;
 var end;
 var path = [];
 var noSolution = false;
-var showModal = true;
 
 var w,h;
 var col;
 var col1; //colour
-var mapImg;
 
 
 //API TOKEN
-// mapboxgl.accessToken = 'pk.eyJ1IjoiZW1hbmR1IiwiYSI6ImNtbW5qM2Z3MjAzcnoycHF4dTBuOG8wc2wifQ.mBPcJ0360AIFTC45szdlcw';
+mapboxgl.accessToken = 'pk.eyJ1IjoiZW1hbmR1IiwiYSI6ImNtbW5qM2Z3MjAzcnoycHF4dTBuOG8wc2wifQ.mBPcJ0360AIFTC45szdlcw';
 
 //creating the mappp
 const map = new mapboxgl.Map({
@@ -121,49 +129,52 @@ function GridFromMap(map, cols, rows) {
 
 
     //deifnidng with & height of colums so that it adjust to the width & height of the canvas!
-    w = width/cols;
-    h = height/rows;
+    // w = lngStep;
+    // h = latStep;
     //making the 2d array (grid)
+    const bounds = map.getBounds();
 
-    for (var i = 0; i < cols; i++){
-        grid[i] = new Array (rows);
+    const west = bounds.getWest();
+    const east = bounds.getEast();
+    const south = bounds.getSouth();
+    const north = bounds.getNorth();
 
+    const lngStep = (east - west) / cols;
+    const latStep = (north - south) / rows;
+
+    const grid = new Array(cols);
+
+    for (let i = 0; i < cols; i++) {
+
+        grid[i] = new Array(rows);
+
+        for (let j = 0; j < rows; j++) {
+
+            const lng = west + i * lngStep + lngStep / 2;
+            const lat = south + j * latStep + latStep / 2;
+
+            grid[i][j] = new Spot(i, j, lng, lat);
+
+        }
     }
 
-    for (var i = 0; i < cols; i++){
-        for (var j = 0; j < rows; j++){
-            grid[i][j] = new Spot(i,j);
-        }   
-    }
-
-    for (var i = 0; i < cols; i++){
-        for (var j = 0; j < rows; j++){
-            grid[i][j].addNeighbours(grid);
-        }   
-    }
-
-
-
-    //start and end of the grid
-    start = grid[0][0];
-    end = grid[cols-1][rows-1];
-    //adding in that the start and end can never be a wall!
-    start.wall = false;
-    end.wall = false;
-
-    //opening the set
-    //start searching at 0,0 and then add numbers to the end of the array i'm assuming this logic works until the end of the array?
-    openSet.push(start);
+    return grid;
 
 }
 
-function drawPathOnMap(path) { 
-    //... 
-}
+// function drawPathOnMap(path) { 
+//     //... 
+// }
 
 function runAStar(grid, startSpot, endSpot){
     //gonna add fucntion that will run astar here, in previous sketch was happening in draw
     //but this is no longer needed bcs onyl want it o happen when a point B is chosen!
+
+    openSet = [];
+    closedSet = [];
+    path = [];
+
+    openSet.push(startSpot);
 
     var current;
 
@@ -180,7 +191,7 @@ function runAStar(grid, startSpot, endSpot){
 
         current = openSet[winner];
 
-        if (current === end) {
+        if (current === endSpot) {
             console.log("DONE!");
             noLoop();
         }
@@ -214,18 +225,23 @@ function runAStar(grid, startSpot, endSpot){
                 }
 
                 if (newPath) {
-                    neighbour.h = heuristic(neighbour, end);
+                    neighbour.h = heuristic(neighbour, endSpot);
                     neighbour.f = neighbour.g + neighbour.h;
                     neighbour.previous = current;
                 }
             }
         }
 
+        for (let i = 0; i < cols; i++) {
+            for (let j = 0; j < rows; j++) {
+                grid[i][j].addNeighbours(grid);
+            }
+        }
+
     } else {
         console.log("no path!");
         noSolution = true;
-        noLoop();
-        return;
+        return grid;
     }
 
     // background(220);
@@ -265,26 +281,22 @@ function runAStar(grid, startSpot, endSpot){
 }
 
 //old function from coding train vid
-function Spot(i,j){
+function Spot(i,j,lng,lat){
 
-    this.i = startLngLat[0];
-    this.j = startLngLat[1];
+        this.i = i;
+        this.j = j;
+        this.lng = lng;
+        this.lat = lat;
+    
+        this.f = 0;
+        this.g = 0;
+        this.h = 0;
+    
+        this.neighbours = [];
+        this.previous = undefined;
+        this.wall = false;
+        this.park = false;
 
-    this.f = 0;
-    this.g = 0;
-    this.h = 0;
-
-    this.neighbours = [];
-    this.previous = undefined;
-    this.wall = false;
-    this.park = false;
-
-    if(random(1)< 0.1){
-        this.wall = true;
-    }
-    if(random(1)> 0.1 && random(1)<=0.2){
-        this.park = true;
-    }
 
     //show function
 
