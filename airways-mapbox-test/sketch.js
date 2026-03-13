@@ -1,12 +1,19 @@
+let startLngLat = null;
+let endLngLat = null;
+
+
+//API TOKEN
 mapboxgl.accessToken = 'pk.eyJ1IjoiZW1hbmR1IiwiYSI6ImNtbW5qM2Z3MjAzcnoycHF4dTBuOG8wc2wifQ.mBPcJ0360AIFTC45szdlcw';
 
+//creating the mappp
 const map = new mapboxgl.Map({
     container: 'map',
     style: 'mapbox://styles/mapbox/standard',
-    center: [-79.4512, 43.6568],
-    zoom: 13
+    center: [-0.1345, 51.544],
+    zoom: 10
 });
 
+// the directions
 const directions = new MapboxDirections({
     accessToken: mapboxgl.accessToken,
     unit: 'metric',
