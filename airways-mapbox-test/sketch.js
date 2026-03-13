@@ -1,9 +1,17 @@
 let startLngLat = null;
 let endLngLat = null;
 
+let clickStage = 0;
+let startMarker = null;
+let endMarker = null;
+const info = document.getElementById('info');
+
+let map;
+let cols;
+let rows;
 
 //API TOKEN
-mapboxgl.accessToken = 'pk.eyJ1IjoiZW1hbmR1IiwiYSI6ImNtbW5qM2Z3MjAzcnoycHF4dTBuOG8wc2wifQ.mBPcJ0360AIFTC45szdlcw';
+// mapboxgl.accessToken = 'pk.eyJ1IjoiZW1hbmR1IiwiYSI6ImNtbW5qM2Z3MjAzcnoycHF4dTBuOG8wc2wifQ.mBPcJ0360AIFTC45szdlcw';
 
 //creating the mappp
 const map = new mapboxgl.Map({
@@ -20,19 +28,18 @@ const directions = new MapboxDirections({
     profile: 'mapbox/walking'
 });
 
+// directional app control
 map.addControl(directions, 'top-left');
 
-let clickStage = 0;
-let startMarker = null;
-let endMarker = null;
 
-const info = document.getElementById('info');
-
+// On click set the points. One click = point A, 2nd click = point B, final click resets so you can click again lol.
 map.on('click', (e) => {
 
     const lngLat = [e.lngLat.lng, e.lngLat.lat];
 
     if (clickStage === 0) {
+        
+        startLngLat = lngLat;
 
         directions.setOrigin(lngLat);
 
@@ -47,14 +54,25 @@ map.on('click', (e) => {
 
     } else if (clickStage === 1) {
 
+        endLngLat = lngLat;
+    
         directions.setDestination(lngLat);
-
+    
         if (endMarker) endMarker.remove();
-
-        endMarker = new mapboxgl.Marker({color:'red'})
+    
+        endMarker = new mapboxgl.Marker({ color: 'red' })
             .setLngLat(lngLat)
             .addTo(map);
-
+    
+        const grid = GridFromMap(map, 40, 40);
+        assignFakeParks(grid);
+    
+        const startSpot = findClosestSpot(grid, startLngLat);
+        const endSpot = findClosestSpot(grid, endLngLat);
+    
+        const path = runAStar(grid, startSpot, endSpot);
+        drawPathOnMap(path);
+    
         clickStage = 2;
         info.textContent = "Route set. Click again to reset.";
 
@@ -78,3 +96,8 @@ map.on('click', (e) => {
     }
 
 });
+
+
+function GridFromMap(map, cols, rows) {
+    // instructions go here
+}
