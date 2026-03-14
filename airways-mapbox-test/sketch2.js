@@ -339,15 +339,10 @@ function removeFromArray(arr,elt){
     }
 }
 
-function heuristic (a,b){
-    //this is known as euclidiian distance uses pythag theorem
-    // var d = dist(a.i,a.j,b.i,b.j);
-
-    // //absolute distance version
-    var d = abs(a.i - b.i) + abs(a.j-b.j);
-    
+function heuristic(a, b) {
+    // Use Math.abs for absolute distance calculation
+    var d = Math.abs(a.i - b.i) + Math.abs(a.j - b.j);
     return d;
-
 }
 
 // Define a custom dist function to replace p5.js dist
