@@ -1,144 +1,3 @@
-<!-- <!DOCTYPE html>
-<html>
-<head>
-  <meta charset="utf-8">
-  <title>A to B geocoder</title>
-  <meta name="viewport" content="initial-scale=1,maximum-scale=1,user-scalable=no">
-
-  <link href="https://api.mapbox.com/mapbox-gl-js/v3.20.0/mapbox-gl.css" rel="stylesheet">
-  <script src="https://api.mapbox.com/mapbox-gl-js/v3.20.0/mapbox-gl.js"></script>
-
-  <script src="https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-geocoder/v5.1.0/mapbox-gl-geocoder.min.js"></script>
-  <link
-    rel="stylesheet"
-    href="https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-geocoder/v5.1.0/mapbox-gl-geocoder.css"
-    type="text/css"
-  >
-
-  <style>
-    body { margin: 0; padding: 0; }
-    #map { position: absolute; top: 0; bottom: 0; width: 100%; }
-
-    .geocoder-panel {
-      position: absolute;
-      top: 10px;
-      left: 10px;
-      z-index: 1;
-      width: 320px;
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-    }
-
-    .geocoder-box {
-      background: white;
-      padding: 6px;
-      border-radius: 6px;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.15);
-    }
-
-    .label {
-      font: 12px/1.4 sans-serif;
-      margin-bottom: 4px;
-      color: #333;
-    }
-  </style>
-</head>
-<body>
-
-<div id="map"></div>
-
-<div class="geocoder-panel">
-  <div class="geocoder-box">
-    <div class="label">A — Start</div>
-    <div id="geocoder-start"></div>
-  </div>
-
-  <div class="geocoder-box">
-    <div class="label">B — Destination</div>
-    <div id="geocoder-end"></div>
-  </div>
-</div>
-
-<script>
-  mapboxgl.accessToken = 'pk.eyJ1IjoiZW1hbmR1IiwiYSI6ImNtbW5qM2Z3MjAzcnoycHF4dTBuOG8wc2wifQ.mBPcJ0360AIFTC45szdlcw';
-
-  const map = new mapboxgl.Map({
-    container: 'map',
-    style: 'mapbox://styles/mapbox/standard',
-    center: [-79.4512, 43.6568],
-    zoom: 13
-  });
-
-  let startCoords = null;
-  let endCoords = null;
-
-  let startMarker = null;
-  let endMarker = null;
-
-  const startGeocoder = new MapboxGeocoder({
-    accessToken: mapboxgl.accessToken,
-    mapboxgl: mapboxgl,
-    marker: false,
-    placeholder: 'Enter start point'
-  });
-
-  const endGeocoder = new MapboxGeocoder({
-    accessToken: mapboxgl.accessToken,
-    mapboxgl: mapboxgl,
-    marker: false,
-    placeholder: 'Enter destination'
-  });
-
-  document.getElementById('geocoder-start').appendChild(startGeocoder.onAdd(map));
-  document.getElementById('geocoder-end').appendChild(endGeocoder.onAdd(map));
-
-  startGeocoder.on('result', (e) => {
-    startCoords = e.result.center; // [lng, lat]
-
-    if (startMarker) startMarker.remove();
-    startMarker = new mapboxgl.Marker({ color: 'green' })
-      .setLngLat(startCoords)
-      .addTo(map);
-
-    fitToBothPoints();
-    console.log('Start:', startCoords);
-  });
-
-  endGeocoder.on('result', (e) => {
-    endCoords = e.result.center; // [lng, lat]
-
-    if (endMarker) endMarker.remove();
-    endMarker = new mapboxgl.Marker({ color: 'red' })
-      .setLngLat(endCoords)
-      .addTo(map);
-
-    fitToBothPoints();
-    console.log('End:', endCoords);
-  });
-
-  function fitToBothPoints() {
-    if (!startCoords || !endCoords) return;
-
-    const bounds = new mapboxgl.LngLatBounds();
-    bounds.extend(startCoords);
-    bounds.extend(endCoords);
-
-    map.fitBounds(bounds, {
-      padding: 80
-    });
-
-    // This is where you could also request and draw a route
-    console.log('A and B selected:', { startCoords, endCoords });
-  }
-</script>
-
-</body>
-</html> -->
-
-
-<!-- Version that can add directions interface to a map -->
-
 <!DOCTYPE html>
 <html>
 <head>
@@ -148,7 +7,6 @@
 
 <link href="https://api.mapbox.com/mapbox-gl-js/v3.20.0/mapbox-gl.css" rel="stylesheet">
 <script src="https://api.mapbox.com/mapbox-gl-js/v3.20.0/mapbox-gl.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/p5@2.2.1/lib/p5.min.js"></script>
 
 <link rel="stylesheet"
 href="https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-directions/v4.3.1/mapbox-gl-directions.css">
@@ -181,10 +39,9 @@ body { margin: 0; padding: 0; }
 <div id="map"></div>
 <div class="info-box" id="info">Click map to set A</div>
 
+<script src="https://cdn.jsdelivr.net/npm/p5@2.2.1/lib/p5.min.js"></script>
 <script src="https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-directions/v4.3.1/mapbox-gl-directions.js"></script>
-
-<!-- Your JS file -->
-<script src="sketch.js"></script>
+<script src="sketch2.js"></script>
 
 </body>
 </html>

@@ -35,7 +35,7 @@ var w,h;
 
 
 //API TOKEN
-// mapboxgl.accessToken = 'pk.eyJ1IjoiZW1hbmR1IiwiYSI6ImNtbW5qM2Z3MjAzcnoycHF4dTBuOG8wc2wifQ.mBPcJ0360AIFTC45szdlcw';
+mapboxgl.accessToken = 'pk.eyJ1IjoiZW1hbmR1IiwiYSI6ImNtbW5qM2Z3MjAzcnoycHF4dTBuOG8wc2wifQ.mBPcJ0360AIFTC45szdlcw';
 
 //creating the mappp
 const map = new mapboxgl.Map({
@@ -328,6 +328,11 @@ function assignFakeParks(grid) {
 }
 
 
+
+// Define a custom dist function to replace p5.js dist
+function dist(x1, y1, x2, y2) {
+    return Math.sqrt(Math.pow(x2 - x1, 2) + Math.pow(y2 - y1, 2));
+}
 
 function removeFromArray(arr,elt){
     for (var i = arr.length-1; i>=0; i--){
