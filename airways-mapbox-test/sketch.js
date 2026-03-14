@@ -35,7 +35,7 @@ var col1; //colour
 
 
 //API TOKEN
-mapboxgl.accessToken = 'pk.eyJ1IjoiZW1hbmR1IiwiYSI6ImNtbW5qM2Z3MjAzcnoycHF4dTBuOG8wc2wifQ.mBPcJ0360AIFTC45szdlcw';
+// mapboxgl.accessToken = 'pk.eyJ1IjoiZW1hbmR1IiwiYSI6ImNtbW5qM2Z3MjAzcnoycHF4dTBuOG8wc2wifQ.mBPcJ0360AIFTC45szdlcw';
 
 //creating the mappp
 const map = new mapboxgl.Map({
@@ -123,95 +123,114 @@ map.on('click', (e) => {
 
 
 function GridFromMap(map, cols, rows) {
-    // instructions go here
-    console.log('A*');
-
-
-
-    //deifnidng with & height of colums so that it adjust to the width & height of the canvas!
-    // w = lngStep;
-    // h = latStep;
-    //making the 2d array (grid)
-    const bounds = map.getBounds();
-
-    const west = bounds.getWest();
-    const east = bounds.getEast();
-    const south = bounds.getSouth();
-    const north = bounds.getNorth();
-
-    const lngStep = (east - west) / cols;
-    const latStep = (north - south) / rows;
-
-    const grid = new Array(cols);
-
-    for (let i = 0; i < cols; i++) {
-
-        grid[i] = new Array(rows);
-
-        for (let j = 0; j < rows; j++) {
-
-            const lng = west + i * lngStep + lngStep / 2;
-            const lat = south + j * latStep + latStep / 2;
-
-            grid[i][j] = new Spot(i, j, lng, lat);
-
+    
+        console.log('A*');
+    
+        const bounds = map.getBounds();
+    
+        const west = bounds.getWest();
+        const east = bounds.getEast();
+        const south = bounds.getSouth();
+        const north = bounds.getNorth();
+    
+        const lngStep = (east - west) / cols;
+        const latStep = (north - south) / rows;
+    
+        const grid = new Array(cols);
+    
+        for (let i = 0; i < cols; i++) {
+            grid[i] = new Array(rows);
+    
+            for (let j = 0; j < rows; j++) {
+                const lng = west + i * lngStep + lngStep / 2;
+                const lat = south + j * latStep + latStep / 2;
+    
+                grid[i][j] = new Spot(i, j, lng, lat);
+            }
         }
+    
+        for (let i = 0; i < cols; i++) {
+            for (let j = 0; j < rows; j++) {
+                grid[i][j].addNeighbours(grid);
+            }
+        }
+    
+        return grid;
     }
 
-    return grid;
+    function drawPathOnMap(path) {
+        const routeGeoJSON = {
+            type: 'Feature',
+            geometry: {
+                type: 'LineString',
+                coordinates: path.map(spot => [spot.lng, spot.lat])
+            }
+        };
+    
+        if (map.getSource('astar-route')) {
+            map.getSource('astar-route').setData(routeGeoJSON);
+        } else {
+            map.addSource('astar-route', {
+                type: 'geojson',
+                data: routeGeoJSON
+            });
+    
+            map.addLayer({
+                id: 'astar-route',
+                type: 'line',
+                source: 'astar-route',
+                paint: {
+                    'line-color': '#0066ff',
+                    'line-width': 4
+                }
+            });
+        }
+    }   
 
-}
-
-// function drawPathOnMap(path) { 
-//     //... 
-// }
-
-function runAStar(grid, startSpot, endSpot){
-    //gonna add fucntion that will run astar here, in previous sketch was happening in draw
-    //but this is no longer needed bcs onyl want it o happen when a point B is chosen!
-
+function runAStar(grid, startSpot, endSpot) {
     openSet = [];
     closedSet = [];
     path = [];
+    noSolution = false;
 
     openSet.push(startSpot);
 
-    var current;
-
-    
-
-    if (openSet.length > 0) {
-
-        var winner = 0;
-        for (var i = 0; i < openSet.length; i++) {
+    while (openSet.length > 0) {
+        let winner = 0;
+        for (let i = 0; i < openSet.length; i++) {
             if (openSet[i].f < openSet[winner].f) {
                 winner = i;
             }
         }
 
-        current = openSet[winner];
+        let current = openSet[winner];
 
         if (current === endSpot) {
-            console.log("DONE!");
-            noLoop();
+            let finalPath = [];
+            let temp = current;
+            finalPath.push(temp);
+
+            while (temp.previous) {
+                finalPath.push(temp.previous);
+                temp = temp.previous;
+            }
+
+            return finalPath.reverse();
         }
 
         removeFromArray(openSet, current);
         closedSet.push(current);
 
-        var neighbours = current.neighbours;
-        for (var i = 0; i < neighbours.length; i++) {
-            var neighbour = neighbours[i];
+        let neighbours = current.neighbours;
+        for (let i = 0; i < neighbours.length; i++) {
+            let neighbour = neighbours[i];
 
             if (!closedSet.includes(neighbour) && !neighbour.wall) {
-                var moveCost = 1;
+                let moveCost = 1;
+                if (neighbour.park) moveCost = 0.5;
 
-                if (neighbour.park) {
-                     moveCost = 0.5;
-                }
-
-                var tempG = current.g + moveCost;
-                var newPath = false;
+                let tempG = current.g + moveCost;
+                let newPath = false;
 
                 if (openSet.includes(neighbour)) {
                     if (tempG < neighbour.g) {
@@ -231,53 +250,10 @@ function runAStar(grid, startSpot, endSpot){
                 }
             }
         }
-
-        for (let i = 0; i < cols; i++) {
-            for (let j = 0; j < rows; j++) {
-                grid[i][j].addNeighbours(grid);
-            }
-        }
-
-    } else {
-        console.log("no path!");
-        noSolution = true;
-        return grid;
     }
 
-    // background(220);
-
-    for (var i = 0; i < cols; i++) {
-        for (var j = 0; j < rows; j++) {
-            grid[i][j].show(color(255));
-        }
-    }
-
-    for (var i = 0; i < closedSet.length; i++) {
-        closedSet[i].show(color(255, 0, 0));
-    }
-
-    for (var i = 0; i < openSet.length; i++) {
-        openSet[i].show(color(255, 255, 0));
-    }
-
-    path = [];
-    var temp = current;
-    if (temp) {
-        path.push(temp);
-        while (temp.previous) {
-            path.push(temp.previous);
-            temp = temp.previous;
-        }
-    }
-
-    for (var i = 0; i < path.length; i++) {
-        path[i].show(color(0, 0, 255));
-    }
-
-    fill(0);
-    textSize(12);
-    textAlign(LEFT, TOP);
-
+    console.log("no path!");
+    return [];
 }
 
 //old function from coding train vid
@@ -298,45 +274,50 @@ function Spot(i,j,lng,lat){
         this.park = false;
 
 
-    //show function
-
-    this.show = function(col) {
-        // //drawing for original a* function not really needed for this
-        // let c = col;
-    
-        // if (this.wall) {
-        //     c = color(0);
-        // } else if (this.park) {
-        //     c = color(120, 200, 120);
-        // }
-    
-        // fill(c);
-        // strokeWeight(1);
-        // rect(this.i * w, this.j * h, w, h);
-    } //END spot function
-
-    this.addNeighbours = function(grid){
+        this.addNeighbours = function(grid) {
+            let i = this.i;
+            let j = this.j;
         
-        var i = this.i;
-        var j = this.j;
-
-     if(i < cols-1){
-        this.neighbours.push(grid[i+1][j]);
-     }
-     if(i > 0){
-        this.neighbours.push(grid[i-1][j]);
-     }
-     if(j < rows-1){
-        this.neighbours.push(grid[i][j+1]);
-     }
-     if(j > 0){
-        this.neighbours.push(grid[i][j-1]);
-     }
-        
-    }
+            if (i < grid.length - 1) this.neighbours.push(grid[i + 1][j]);
+            if (i > 0) this.neighbours.push(grid[i - 1][j]);
+            if (j < grid[0].length - 1) this.neighbours.push(grid[i][j + 1]);
+            if (j > 0) this.neighbours.push(grid[i][j - 1]);
+        }
 
 
 }
+
+
+function findClosestSpot(grid, lngLat) {
+    let closest = null;
+    let bestDist = Infinity;
+
+    for (let i = 0; i < grid.length; i++) {
+        for (let j = 0; j < grid[i].length; j++) {
+            let spot = grid[i][j];
+            let d = dist(lngLat[0], lngLat[1], spot.lng, spot.lat);
+
+            if (d < bestDist) {
+                bestDist = d;
+                closest = spot;
+            }
+        }
+    }
+
+    return closest;
+}
+
+
+
+function assignFakeParks(grid) {
+    for (let i = 10; i < 20; i++) {
+        for (let j = 10; j < 20; j++) {
+            grid[i][j].park = true;
+        }
+    }
+}
+
+
 
 function removeFromArray(arr,elt){
     for (var i = arr.length-1; i>=0; i--){
