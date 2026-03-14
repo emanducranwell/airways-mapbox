@@ -18,8 +18,8 @@ const info = document.getElementById('info');
 // const latStep = (north - south) / rows;
 
 //global a* variables
-var cols = 50;
-var rows = 50;
+var cols = 200;
+var rows = 200;
 var grid = new Array(cols);
 
 var openSet = [];
@@ -88,7 +88,7 @@ map.on('click', (e) => {
             .setLngLat(lngLat)
             .addTo(map);
     
-        const grid = GridFromMap(map, 40, 40);
+        const grid = GridFromMap(map, cols, rows); // Use dynamic cols and rows values
         assignFakeParks(grid);
     
         const startSpot = findClosestSpot(grid, startLngLat);
@@ -119,6 +119,7 @@ map.on('click', (e) => {
         info.textContent = "Click map to set B";
     }
 
+    return true; // Ensure the listener indicates a response
 });
 
 
@@ -176,7 +177,7 @@ function drawPathOnMap(path) {
             coordinates: path.map(spot => [spot.lng, spot.lat])
         }
     };
-    
+
     if (map.getSource('astar-route')) {
         map.getSource('astar-route').setData(routeGeoJSON);
     } else {
@@ -184,7 +185,7 @@ function drawPathOnMap(path) {
             type: 'geojson',
             data: routeGeoJSON
         });
-    
+
         map.addLayer({
             id: 'astar-route',
             type: 'line',
@@ -329,11 +330,6 @@ function assignFakeParks(grid) {
 
 
 
-// Define a custom dist function to replace p5.js dist
-function dist(x1, y1, x2, y2) {
-    return Math.sqrt(Math.pow(x2 - x1, 2) + Math.pow(y2 - y1, 2));
-}
-
 function removeFromArray(arr,elt){
     for (var i = arr.length-1; i>=0; i--){
         if (arr[i] === elt){
@@ -352,4 +348,9 @@ function heuristic (a,b){
     
     return d;
 
+}
+
+// Define a custom dist function to replace p5.js dist
+function dist(x1, y1, x2, y2) {
+    return Math.sqrt(Math.pow(x2 - x1, 2) + Math.pow(y2 - y1, 2));
 }
